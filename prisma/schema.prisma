@@ -1,0 +1,228 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum PropertyType {
+  APARTMENT
+  VILLA
+  PENTHOUSE
+  FAMILY_HOME
+  COMMERCIAL
+  NEW_DEVELOPMENT
+}
+
+enum PropertyStatus {
+  FOR_SALE
+  FOR_RENT
+  SOLD
+  RESERVED
+}
+
+enum InquiryStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  CLOSED
+}
+
+enum VisitStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id            String     @id @default(cuid())
+  name          String?
+  email         String     @unique
+  emailVerified DateTime?
+  image         String?
+  role          Role       @default(USER)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  favorites     Favorite[]
+  inquiries     Inquiry[]
+  visits        Visit[]
+}
+
+model Location {
+  id            String     @id @default(cuid())
+  name          String     @unique
+  slug          String     @unique
+  city          String
+  state         String?
+  country       String
+  imageUrl      String
+  propertyCount Int        @default(0)
+  avgPrice      String
+  marketInfo    String
+  featured      Boolean    @default(true)
+  createdAt     DateTime   @default(now())
+
+  properties    Property[]
+}
+
+model Agent {
+  id              String     @id @default(cuid())
+  name            String
+  title           String
+  specialization  String
+  email           String     @unique
+  phone           String
+  portraitUrl     String
+  experienceYears Int
+  rating          Float      @default(4.9)
+  bio             String
+  activeListings  Int        @default(0)
+  createdAt       DateTime   @default(now())
+
+  properties      Property[]
+}
+
+model Property {
+  id            String         @id @default(cuid())
+  title         String
+  slug          String         @unique
+  description   String
+  price         Float
+  currency      String         @default("USD")
+  address       String
+  city          String
+  state         String?
+  country       String
+  zipCode       String?
+  latitude      Float
+  longitude     Float
+  type          PropertyType
+  status        PropertyStatus @default(FOR_SALE)
+  bedrooms      Int
+  bathrooms     Float
+  areaSqFt      Int
+  yearBuilt     Int?
+  featured      Boolean        @default(false)
+  published     Boolean        @default(true)
+  viewsCount    Int            @default(0)
+  virtualTourUrl String?
+  floorPlanUrl  String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  locationId    String
+  location      Location       @relation(fields: [locationId], references: [id])
+
+  agentId       String
+  agent         Agent          @relation(fields: [agentId], references: [id])
+
+  images        PropertyImage[]
+  amenities     PropertyAmenity[]
+  favorites     Favorite[]
+  inquiries     Inquiry[]
+  visits        Visit[]
+
+  @@index([locationId])
+  @@index([agentId])
+  @@index([type])
+  @@index([price])
+}
+
+model PropertyImage {
+  id         String   @id @default(cuid())
+  url        String
+  caption    String?
+  isPrimary  Boolean  @default(false)
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+}
+
+model Amenity {
+  id          String            @id @default(cuid())
+  name        String            @unique
+  category    String            @default("General")
+  iconName    String
+  properties  PropertyAmenity[]
+}
+
+model PropertyAmenity {
+  propertyId String
+  amenityId  String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  amenity    Amenity  @relation(fields: [amenityId], references: [id], onDelete: Cascade)
+
+  @@id([propertyId, amenityId])
+}
+
+model Favorite {
+  id         String   @id @default(cuid())
+  userId     String
+  propertyId String
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, propertyId])
+}
+
+model Inquiry {
+  id                String        @id @default(cuid())
+  name              String
+  email             String
+  phone             String
+  preferredLocation String
+  propertyType      String
+  budget            String
+  intent            String        @default("BUY")
+  message           String
+  status            InquiryStatus @default(NEW)
+  propertyId        String?
+  userId            String?
+  createdAt         DateTime      @default(now())
+
+  property          Property?     @relation(fields: [propertyId], references: [id])
+  user              User?         @relation(fields: [userId], references: [id])
+}
+
+model Visit {
+  id              String      @id @default(cuid())
+  referenceNumber String      @unique
+  propertyId      String
+  date            String
+  timeSlot        String
+  name            String
+  email           String
+  phone           String
+  notes           String?
+  status          VisitStatus @default(PENDING)
+  userId          String?
+  createdAt       DateTime    @default(now())
+
+  property        Property    @relation(fields: [propertyId], references: [id])
+  user            User?       @relation(fields: [userId], references: [id])
+}
+
+model BlogPost {
+  id              String   @id @default(cuid())
+  title           String
+  slug            String   @unique
+  summary         String
+  content         String
+  category        String
+  author          String
+  coverImageUrl   String
+  readTimeMinutes Int
+  published       Boolean  @default(true)
+  publishedAt     DateTime @default(now())
+  createdAt       DateTime @default(now())
+}

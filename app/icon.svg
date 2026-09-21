@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF0C3" />
+      <stop offset="50%" stop-color="#D4AF37" />
+      <stop offset="100%" stop-color="#9A7B2C" />
+    </linearGradient>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#18181B" />
+      <stop offset="100%" stop-color="#0A0A0A" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background Container -->
+  <rect x="1" y="1" width="30" height="30" rx="8" fill="url(#bgGrad)" stroke="#D4AF37" stroke-opacity="0.4" stroke-width="1.5"/>
+  
+  <!-- Stylized Luxury Architectural 'X' Mark -->
+  <path d="M9 8 L14 16 L9 24 L12 24 L16 17.5 L20 24 L23 24 L18 16 L23 8 L20 8 L16 14.5 L12 8 Z" fill="url(#goldGrad)" />
+</svg>
